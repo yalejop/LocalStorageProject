@@ -8,7 +8,18 @@ let tweets = [];
 eventListeners();
 
 function eventListeners() {
+    //cuando el usuario agrega un nuevo tweet
     formulario.addEventListener('submit', agregarTweet);
+
+    //cuando el documento esta listo
+    document.addEventListener('DOMContentLoaded', () => {
+        tweets = JSON.parse(localStorage.getItem('tweets')) || [];
+
+        console.log(tweets)
+
+        crearHTML();
+    })
+
 
 }
 
@@ -20,12 +31,28 @@ function agregarTweet(e) {
     e.preventDefault();
 
     const tweet = document.querySelector('#tweet').value;
+
+    //validacion
     if (tweet === '') {
         mostrarError('Un mensaje no puede ir vacio');
         
         return; // evita que se ejecuten mas lineas de código
     } 
-    console.log('agregando tweet')
+    
+    //añadir al arreglo de tweets
+    const tweetObj = {
+        id: Date.now(),
+        tweet, //tweet = tweet
+    }
+
+    //Añadir al arreglo de tweets
+    tweets = [...tweets, tweetObj];
+
+    //una vez agregado vamos a crear el HTML
+    crearHTML();
+
+    //reiniciar el formulario
+    formulario.reset();
 }
 
 //mostrar Mensaje de Error
@@ -43,4 +70,35 @@ function mostrarError(error){
         mensajeError.remove();
     }, 3000);
 
+}
+
+function crearHTML() {
+
+    limpiarHTML();
+
+    if (tweets.length > 0) {
+        tweets.forEach( tweet => {
+            //crear el HTML
+
+            const li = document.createElement('li');
+            //añadir el texto
+            li.textContent = tweet.tweet;
+
+            //insertar en el html
+            listaTweets.appendChild(li);
+
+        });
+    }
+
+    sincronizarStorage();
+}
+
+function sincronizarStorage() {
+    localStorage.setItem('tweets', JSON.stringify(tweets));
+}
+
+function limpiarHTML() {
+    while(listaTweets.firstChild){
+        listaTweets.removeChild(listaTweets.firstChild)
+    }
 }
